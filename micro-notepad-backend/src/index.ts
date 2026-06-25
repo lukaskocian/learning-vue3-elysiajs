@@ -18,7 +18,9 @@ const app = new Elysia()
     // READ
     .get("/notes", async () => {
 
-        return await prisma.noteTable.findMany();
+        return await prisma.noteTable.findMany({
+            orderBy: { createdAt: "asc" }
+        });
     })
 
     // CREATE
