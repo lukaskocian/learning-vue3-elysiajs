@@ -1,5 +1,5 @@
 {
-  "name": "micro-journal-backend",
+  "name": "new-backend",
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -7,10 +7,16 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",
-    "elysia": "latest"
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "cors": "^2.8.6",
+    "elysia": "latest",
+    "pg": "^8.22.0"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/pg": "^8.20.0",
+    "bun-types": "latest",
+    "prisma": "^7.8.0"
   },
   "module": "src/index.js"
 }

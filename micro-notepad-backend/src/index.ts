@@ -1,37 +1,92 @@
 import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 
-export interface Note {
-    id : number,
-    content : string,
-}
+import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const notes : Note[] = [];
+const connectionString = `${process.env.DATABASE_URL}`;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter }); // vytvoření socketu
 
 const app = new Elysia()
     .use(cors())
-    .get("/", () => "Hello Elysiaaaa")
-    .get("/notes", () => {
 
-        return notes;
+    // zdroj info o syntaxe Prismy: https://www.prisma.io/docs/orm/prisma-client/queries/crud
+
+    // READ
+    .get("/notes", async () => {
+
+        return await prisma.noteTable.findMany();
     })
 
-    .post("/notes", ({body}) : Note => { // {body} je destructuring většího objektu Context, který obsahuje info o socketu, body, atd..
+    // CREATE
+    .post("/notes", async ({body}) => { 
+        // {body} je destructuring většího objektu Context, který obsahuje info o socketu, body, atd..
+        /*
+        takhle vypadá struktura objektu Context
+        Context {
+            body,     // Zde je JSON text od klienta
+            params,   // Zde jsou vytažené proměnné z URL
+            headers,  // Zde jsou HTTP hlavičky
+            request_id,
+        }
+        */
 
         // vytvoříme novou poznámku
-        const new_note : Note = {
-            id : notes.length,
-            content : body.content,
-        };
+        const new_note = await prisma.noteTable.create({
+            data: {
+                // id (náš primární klíč) je autom.-generovaný
+                content : body.content,
+            },
+        })
 
-        notes.push(new_note);
         return new_note;
     }, {
-        // 3. parametr - kontroluje jestli klint posílá správné datové typy - pokud ne - navrátí e. 404
+        // 3. parametr - kontroluje jestli klint posílá správné datové typy (VSTUP) - pokud ne - navrátí e. 404
         body : t.Object({
             content : t.String()
         })
     })
+
+    // UPDATE
+    .put("/notes/:id", async ({params, body}) => {
+
+        const updatedNote = await prisma.noteTable.update({
+            where: { id: params.id },
+            data: { content: body.content },
+        })
+
+        return updatedNote;
+
+    } , {
+        // je vstupní parametr (id) číslo a nový obsah string?
+        params : t.Object({
+            id : t.Numeric()
+        }),
+
+        body : t.Object({
+            content : t.String()
+        })
+    })
+
+    // DELETE
+    .delete("/notes/:id", async ({params}) => { // Elysia parsovaný string (:id) automaticky zabalí do objektu params
+
+        const deletedNote = await prisma.noteTable.delete({
+            where: { id: params.id }
+        })
+
+        return deletedNote;
+
+    } , {
+        params : t.Object({
+            id : t.Numeric()
+        })
+    })
+
+
     .listen(3000);
 
 console.log(
@@ -47,3 +102,5 @@ curl -X POST http://localhost:3000/notes \
 */
 
 export type App = typeof app;
+// v "@prisma/client" je vygenerovaný (pomocí schema.prisma - 'bunx prisma generate') TS hlavičkový sobour obsahujicí inteface NoteTable
+export type { NoteTable } from "@prisma/client";

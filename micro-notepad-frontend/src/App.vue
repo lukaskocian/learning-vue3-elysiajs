@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { treaty } from '@elysiajs/eden';
-import type { App, Note } from '../../micro-notepad-backend/src/index';
+import type { App, NoteTable } from '../../micro-notepad-backend/src/index';
 
 // inicalization of client - connecting to backend
 const client = treaty<App>('localhost:3000');
 
 // memory for notes and text that will be shown
-const notes_list = ref<Note[]>([]);
+const notes_list = ref<NoteTable[]>([]);
 const new_note_text = ref<string>("");
 
 const downloadNotes = async () => {
