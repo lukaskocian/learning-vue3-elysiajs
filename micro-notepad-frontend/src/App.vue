@@ -8,15 +8,27 @@ store.downloadNotes();
 </script>
 
 <template>
-  <main>
-    <h1>Notepad</h1>
+  <main class="max-w-2xl mx-auto p-6 mt-12 bg-white rounded-xl shadow-lg border border-gray-100">
+
+    <h1 class="text-4xl font-bold text-blue-600 mb-8 text-center tracking-tight">Notepad</h1>
     
-    <div>
-      <input type="text" v-model="store.new_note_text"/>
-      <button @click="store.addNote">Send</button>
+    <div class="flex mb-8 shadow-sm rounded-lg overflow-hidden">
+      <input 
+        type="text" 
+        v-model="store.new_note_text"
+        placeholder="Write new message..."
+        @keyup.enter="store.addNote" 
+        class="flex-1 bg-gray-50 border border-gray-300 p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+      />
+      <button 
+        @click="store.addNote"
+        class="bg-blue-600 text-white font-semibold px-8 py-4 hover:bg-blue-700 transition-colors"
+      >
+        Send
+      </button>
     </div>
 
-    <ul>
+    <ul class="space-y-3">
         <NItem
             v-for="note in store.notes_list" 
             :key="note.id" 
