@@ -17,3 +17,5 @@ You need to have Bun installed. Then open two terminals:
 3. Setup OpenAI api and Neon DB URL in micro-notepad-backend/.env
 
 The app will then be running in your browser at the address that pops up in the frontend terminal.
+
+<img width="728" height="670" alt="notepad_look" src="https://github.com/user-attachments/assets/b3cdd6fd-cc4c-47c1-89a4-61364b00820a" />
