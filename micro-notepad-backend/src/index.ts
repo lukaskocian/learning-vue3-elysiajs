@@ -129,6 +129,7 @@ const app = new Elysia()
 
         const result = response.output_parsed;
         if (!result) {
+            return;
         }        
 
         // save back to DB
