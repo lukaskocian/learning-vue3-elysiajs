@@ -38,6 +38,11 @@ defineProps<{ parm_note: NoteTable }>();
                 >
                   Delete
                 </button>
+                <button
+                  @click="store.translateNote(parm_note.id)"
+                  class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded text-sm font-semibold hover:bg-yellow-200 transition"
+                >Translate
+                </button>
             </div>
 
         </div>

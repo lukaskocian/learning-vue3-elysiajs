@@ -14,6 +14,7 @@ export const useMyNotesStore = defineStore('notes_hash_key', () => {
     const new_note_text = ref<string>("");
     const updated_text = ref<string>();
     const updated_note_id = ref<number>();
+    const language_translate_to = ref<string>("Spanish");
 
     const downloadNotes = async () => {
         
@@ -57,7 +58,7 @@ export const useMyNotesStore = defineStore('notes_hash_key', () => {
             return;
         }
 
-        const response = await client.notes({id : String(updated_note_id.value)}).put({content : updated_text.value})
+        const response = await client.notes({id : String(updated_note_id.value)}).put({content : updated_text.value});
 
         if (response.error) {
             console.error("Error while updating: ", response.error);
@@ -66,6 +67,22 @@ export const useMyNotesStore = defineStore('notes_hash_key', () => {
 
         updated_note_id.value = undefined;
         updated_text.value = "";
+        downloadNotes();
+    }
+
+    const translateNote = async (id_to_translate : number) => {
+
+        if (language_translate_to.value === "") {
+            return;
+        }
+
+        const response = await client.notes.translate({id : String(id_to_translate)}).put({language : language_translate_to.value});
+
+        if (response.error) {
+            console.error("Error while translating: ", response.error);
+            return;
+        }
+
         downloadNotes();
     }
 
@@ -91,9 +108,11 @@ export const useMyNotesStore = defineStore('notes_hash_key', () => {
         new_note_text,
         updated_text,
         updated_note_id,
+        language_translate_to,
         downloadNotes,
         addNote,
         updateNote,
+        translateNote,
         deleteNote,
         startEditing
     };

@@ -5,10 +5,25 @@ import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
+import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod";
+import { z } from "zod";
+
 const connectionString = `${process.env.DATABASE_URL}`;
+const openai = new OpenAI()
+
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter }); // vytvoření socketu
+
+const TranslationFormat = z.object({
+    translated_text: z.string(),
+});
+
+const getPrompt = (language : string, text_to_translate : string) : string => {
+
+    return `Translate this text:\n${text_to_translate}\nto language ${language}. If the language you are translating from is same as language you are translating to, just rewrite it the same way.`;
+}
 
 const app = new Elysia()
     .use(cors())
@@ -85,6 +100,53 @@ const app = new Elysia()
     } , {
         params : t.Object({
             id : t.Numeric()
+        })
+    })
+
+    // TRANSLATE NOTE
+    .put("notes/translate/:id", async ({params, body}) => {
+
+        // find in db
+        const noteToTranslate = await prisma.noteTable.findUnique({
+             where: { id: params.id } 
+        });
+
+        if (!noteToTranslate) {
+            return { error: "Note id not found in DB"}
+        };
+
+        // translate with OpenAI LLM
+        const response = await openai.responses.parse({
+            model: "gpt-5.4-mini",
+            input: [
+                { role: "system", content: "You are a professional translator. Translate the given text to the requested language. Do not add any notes." },
+                { role: "user", content: getPrompt(body.language, noteToTranslate.content)}
+            ],
+            text: {
+                format: zodTextFormat(TranslationFormat, "translation_response"), // the name is for openai cache
+            },
+        });
+
+        const result = response.output_parsed;
+        if (!result) {
+        }        
+
+        // save back to DB
+        const translatedNote = await prisma.noteTable.update({
+            where: { id: params.id },
+            data: { content: result?.translated_text },
+        })
+
+        return translatedNote;
+
+
+    } , {
+        params : t.Object({
+            id : t.Numeric()
+        }),
+
+        body : t.Object({
+            language : t.String()
         })
     })
 

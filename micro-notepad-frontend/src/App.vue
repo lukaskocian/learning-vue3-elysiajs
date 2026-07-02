@@ -28,6 +28,20 @@ store.downloadNotes();
       </button>
     </div>
 
+    <div class="flex mb-8 shadow-sm rounded-lg overflow-hidden border border-gray-300">
+      
+      <div class="flex items-center bg-gray-100 text-gray-700 px-4 font-medium border-r border-gray-300">
+        Translate to:
+      </div>
+
+      <input 
+        type="text" 
+        v-model="store.language_translate_to"
+        class="flex-1 bg-white p-3 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+      />
+      
+    </div>
+
     <ul class="space-y-3">
         <NItem
             v-for="note in store.notes_list" 
